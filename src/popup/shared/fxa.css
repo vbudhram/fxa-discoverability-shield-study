@@ -1,0 +1,150 @@
+body {
+  background-color: white;
+  font-family: 'comic sans', sans-serif;
+  width: 375px;
+}
+
+#unverified,
+#sign_in {
+  padding: 25px;
+}
+
+#authenticated {
+  padding: 0px;
+}
+
+.title {
+  color: #666666;
+  font-size: 1.2em;
+  line-height: 1.7em;
+  margin: auto;
+  text-align: center;
+}
+
+.description {
+  color: #666666;
+  font-size: .9em;
+  line-height: 1.7em;
+  margin: auto;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.graphic-choose-what-to-sync {
+  background-image: url('../../icons/choose_what_to_sync_devices.svg');
+  height: 100px;
+  width: 200px;
+  margin:  25px auto 25px auto;
+  background-repeat: no-repeat;
+}
+
+.graphic-mail {
+  background-image: url('../../icons/graphic_mail.svg');
+  height: 100px;
+  width: 200px;
+  margin:  25px auto 25px auto;
+  background-repeat: no-repeat;
+}
+
+.hidden {
+  display: none;
+}
+
+#display-name,
+#email {
+  color: #666666;
+  line-height: 1.4em;
+    font-size: .9em;
+}
+
+#avatar {
+  background-image: url('../../icons/avatar.svg');
+  background-size: contain;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+ul {
+  padding: 0px;
+  margin: 0px;
+}
+
+li {
+  list-style-type: none;
+  margin: 0;
+  padding: 10px 0px 6px 10px;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+
+li:hover {
+  background: #ddd;
+}
+
+li img{
+  height: 20px;
+  width: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #ddd;
+}
+
+#avatar {
+  margin-right: 15px;
+  margin-left: 5px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  height: 25px;
+  padding: 12px 0px 12px 0px;
+}
+
+.avatar-menu {
+  height: 35px;
+}
+
+/* Taken from content server css */
+.button,
+button {
+  align-items: center;
+  background: rgba(12, 12, 13, 0.1);
+  border: 0;
+  color: #0c0c0d;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: 300;
+  height: 48px;
+  justify-content: center;
+  letter-spacing: 0.2px;
+  padding: 0 8px;
+  transition-duration: 150ms;
+  transition-property: background-color;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  width: 100%; }
+button.primary-button {
+  background: #0060df;
+  color: #fff; }
+.button[type='submit']:hover, .button.primary-button:hover,
+.settings-button[type='submit']:hover,
+.settings-button.primary-button:hover,
+button[type='submit']:hover,
+button.primary-button:hover {
+  background: #003eaa; }
+.button[type='submit']:active, .button.primary-button:active,
+.settings-button[type='submit']:active,
+.settings-button.primary-button:active,
+button[type='submit']:active,
+button.primary-button:active {
+  background: #002275; }

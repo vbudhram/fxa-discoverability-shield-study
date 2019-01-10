@@ -11,12 +11,12 @@
   },
   "default_locale": "en-US",
   "experiment_apis": {
-    "fxaBrowserIcon": {
-      "schema": "./privileged/fxaBrowserIcon/schema.json",
+    "fxa": {
+      "schema": "./privileged/fxa/schema.json",
       "parent": {
         "scopes": ["addon_parent"],
-        "script": "./privileged/fxaBrowserIcon/api.js",
-        "paths": [["fxaBrowserIcon"]]
+        "script": "./privileged/fxa/api.js",
+        "paths": [["fxa"]]
       }
     },
     "study": {

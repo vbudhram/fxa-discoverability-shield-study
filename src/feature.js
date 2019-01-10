@@ -64,7 +64,7 @@ class FxABrowserFeature {
     browser.browserAction.onClicked.addListener(() => this.handleButtonClick());
     console.log("initialized");
 
-    browser.fxaBrowserIcon.getSignedInUser().then((data) => {
+    browser.fxa.getSignedInUser().then((data) => {
       console.log("USER DATA --- " + JSON.stringify(data.profileCache));
     });
   }
@@ -95,7 +95,7 @@ class FxABrowserFeature {
       img.src = url;
     }
 
-    browser.fxaBrowserIcon.getSignedInUser().then((data) => {
+    browser.fxa.getSignedInUser().then((data) => {
       if (data && data.profileCache && data.profileCache.profile.avatar) {
         console.log("avatar: " + data.profileCache.profile.avatar)
         const avatar = data.profileCache.profile.avatar;

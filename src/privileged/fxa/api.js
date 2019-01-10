@@ -9,7 +9,7 @@ ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 ChromeUtils.defineModuleGetter(this, "fxAccounts", "resource://gre/modules/FxAccounts.jsm");
 
-this.fxaBrowserIcon = class extends ExtensionAPI {
+this.fxa = class extends ExtensionAPI {
   /**
    * Extension Shutdown
    * APIs that allocate any resources (e.g., adding elements to the browser’s user interface,
@@ -23,12 +23,12 @@ this.fxaBrowserIcon = class extends ExtensionAPI {
 
   getAPI(context) {
     return {
-      fxaBrowserIcon: {
+      fxa: {
         getSignedInUser() {
           console.log("getSignedInUser")
           return fxAccounts.getSignedInUser()
             .then((data) => {
-              console.log("USER DATA: " + JSON.stringify(data));
+              console.log(data);
               return data;
             });
         },

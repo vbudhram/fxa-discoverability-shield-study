@@ -1,0 +1,17 @@
+body {
+  padding: 100px;
+  background-color: fuchsia;
+  color: white;
+  font-family: 'comic sans', sans-serif;
+  font-size: 150%;
+}
+
+.hidden {
+  display: none;
+}
+
+.button {
+  padding: 0.2em 1em;
+  background-color: blue;
+  color: yellow;
+}

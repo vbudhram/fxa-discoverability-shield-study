@@ -46,6 +46,7 @@
   "browser_action": {
     "browser_style": true,
     "default_icon": "icons/avatar.png",
-    "default_title": "__MSG_buttonTitle__"
+    "default_title": "__MSG_buttonTitle__",
+    "default_popup": "popup/fxa.html"
   }
 }

@@ -26,13 +26,10 @@ this.fxa = class extends ExtensionAPI {
   getAPI(context) {
     return {
       fxa: {
-        getSignedInUser() {
-          console.log("api::getSignedInUser");
-          return fxAccounts.getSignedInUser()
-            .then((data) => {
-              console.log(data);
-              return data;
-            });
+        async getSignedInUser () {
+          const data = await fxAccounts.getSignedInUser();
+          console.log("api::getSignedInUser", data);
+          return data;
         },
 
         listen (listener) {

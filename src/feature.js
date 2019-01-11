@@ -48,6 +48,20 @@ class Feature {
   async cleanup() {}
 }
 
+class FxaEventBroker {
+  login (data) {
+    console.log('login', data);
+  }
+
+  logout (data) {
+    console.log('logout', data);
+  }
+
+  profileChange (data) {
+    console.log('profileChange', data);
+  }
+}
+
 class FxABrowserFeature {
   /**
    * - set image, text, click handler (telemetry)
@@ -61,34 +75,50 @@ class FxABrowserFeature {
     // TODO: Running into an error "values is undefined" here
     browser.browserAction.setIcon({ path: "icons/avatar.png" });
     browser.browserAction.setTitle({ title: variation.name });
-    browser.browserAction.onClicked.addListener(() => this.handleButtonClick());
     console.log("initialized");
 
+    browser.fxa.listen();
+
+    browser.fxa.ensureWebChannel();
+
+    browser.fxa.onLogin.addListener((value, data) => {
+        console.log("FxABrowserFeature - onLogin " + JSON.stringify(data));
+      this.setAvatar();
+      },
+    );
+
+    this.setAvatar();
+  }
+
+  setAvatar() {
+    console.log('setAvatar')
     browser.fxa.getSignedInUser().then((data) => {
       if (data && data.profileCache && data.profileCache.profile.avatar) {
         console.log("avatar: " + data.profileCache.profile.avatar)
         const avatar = data.profileCache.profile.avatar;
-        getBase64FromImageUrl(avatar);
+        this.getBase64FromImageUrl(avatar);
+      } else {
+        browser.browserAction.setIcon({ path: "icons/avatar.png" });
       }
     });
+  }
 
-    function getBase64FromImageUrl(url) {
-      const img = new Image();
-      img.setAttribute("crossOrigin", "anonymous");
+  getBase64FromImageUrl(url) {
+    const img = new Image();
+    img.setAttribute("crossOrigin", "anonymous");
 
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = this.width;
-        canvas.height = this.height;
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = this.width;
+      canvas.height = this.height;
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(this, 0, 0);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(this, 0, 0);
 
-        browser.browserAction.setIcon({ imageData: ctx.getImageData(0, 0, 200, 200)});
-      };
+      browser.browserAction.setIcon({ imageData: ctx.getImageData(0, 0, 200, 200)});
+    };
 
-      img.src = url;
-    }
+    img.src = url;
   }
 }
 

@@ -11,6 +11,13 @@ ChromeUtils.import("resource://gre/modules/FxAccountsCommon.js");
 ChromeUtils.defineModuleGetter(this, "fxAccounts", "resource://gre/modules/FxAccounts.jsm");
 ChromeUtils.defineModuleGetter(this, "EnsureFxAccountsWebChannel", "resource://gre/modules/FxAccountsWebChannel.jsm");
 
+/* eslint-disable no-undef */
+const { EventManager } = ExtensionCommon;
+const EventEmitter =
+  ExtensionCommon.EventEmitter || ExtensionUtils.EventEmitter;
+
+class FxAEventEmitter extends EventEmitter {}
+
 this.fxa = class extends ExtensionAPI {
   /**
    * Extension Shutdown
@@ -24,37 +31,46 @@ this.fxa = class extends ExtensionAPI {
   }
 
   getAPI(context) {
+    const fxaEventEmitter = new FxAEventEmitter();
+
     return {
       fxa: {
         getSignedInUser() {
-          console.log("getSignedInUser")
+          console.log("getSignedInUser");
           return fxAccounts.getSignedInUser()
             .then((data) => {
-              console.log(data);
               return data;
             });
         },
 
         ensureWebChannel () {
+          console.log("ensureWebChannel")
           EnsureFxAccountsWebChannel();
         },
 
-        listen (listener) {
-          assertFunction(listener.login);
-          assertFunction(listener.logout);
-          assertFunction(listener.profileChange);
+        onLogin: new EventManager(context, "FxAEventEmitter.onLogin",
+          fire => {
+            console.log("FxAEventEmitter.onLogin");
+            const listener = (value) => {
+              fire.async(value);
+            };
+            fxaEventEmitter.on("onLogin", listener,);
+            return () => {
+              fxaEventEmitter.off("onLogin", listener,);
+            };
+          },
+        ).api(),
 
+        listen () {
+          console.log("listen");
           const broker = {
             observe (subject, topic, data) {
               switch (topic) {
                 case ONLOGIN_NOTIFICATION:
-                  return listener.login(data);
-
                 case ONLOGOUT_NOTIFICATION:
-                  return listener.logout(data);
-
                 case ON_PROFILE_CHANGE_NOTIFICATION:
-                  return listener.profileChange(data);
+                  console.log("observe - " + topic);
+                  fxaEventEmitter.emit("onLogin", data);
               }
             },
           };

@@ -9,6 +9,28 @@
         "description": "Fetch the current signed-in user",
         "async": true,
         "parameters": []
+      },
+      {
+        "name": "ensureWebChannel",
+        "type": "function",
+        "description": "Setup webchannel",
+        "async": true,
+        "parameters": []
+      },
+      {
+        "name": "listen",
+        "type": "function",
+        "description": "Setup FxA webchannel",
+        "async": false,
+        "parameters": []
+      }
+    ],
+    "events": [
+      {
+        "name": "onLogin",
+        "type": "function",
+        "description": "Login event",
+        "parameters": []
       }
     ]
   }

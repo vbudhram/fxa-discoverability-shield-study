@@ -130,29 +130,7 @@ async function onEveryExtensionLoad() {
 
   const studySetup = await getStudySetup();
   console.log(`Study setup: `, studySetup);
+
   await browser.study.setup(studySetup);
 }
 onEveryExtensionLoad();
-
-function initFxa () {
-  EnsureFxAccountsWebChannel();
-  new FxaEventBroker();
-}
-
-class FxaEventBroker {
-  constructor () {
-    browser.fxa.listen(this);
-  }
-
-  login (data) {
-    console.log('login', data);
-  }
-
-  logout (data) {
-    console.log('logout', data);
-  }
-
-  profileChange (data) {
-    console.log('profileChange', data);
-  }
-}

@@ -36,7 +36,7 @@
       }
     }
   },
-  "permissions": ["management", "storage", "alarms", "http://*/"],
+  "permissions": ["management", "storage", "alarms", "http://*/", "https://*/"],
   "background": {
     "scripts": ["studySetup.js", "feature.js", "background.js"]
   },

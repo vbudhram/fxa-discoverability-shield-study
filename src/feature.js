@@ -58,54 +58,71 @@ class FxABrowserFeature {
       variation.name,
     );
 
-    browser.fxa.listen({
-      login (data) {
-        console.log('FxaEventBroker::login', data);
-      },
-
-      logout (data) {
-        console.log('FxaEventBroker::logout', data);
-      },
-
-      profileChange (data) {
-        console.log('FxaEventBroker::profileChange', data);
-      },
-    });
-
-    // TODO: Running into an error "values is undefined" here
-    browser.browserAction.setIcon({ path: "icons/avatar.png" });
     browser.browserAction.setTitle({ title: variation.name });
-    browser.browserAction.onClicked.addListener(() => this.handleButtonClick());
-    console.log("initialized");
+    this.updateState();
 
-    browser.fxa.getSignedInUser().then((data) => {
-      if (data && data.profileCache && data.profileCache.profile.avatar) {
-        console.log("avatar: " + data.profileCache.profile.avatar)
-        const avatar = data.profileCache.profile.avatar;
-        getBase64FromImageUrl(avatar);
-      }
+    browser.fxa.listen({
+      login: this.updateState.bind(this),
+      logout: this.updateState.bind(this),
+      profileChange: this.updateState.bind(this),
     });
+  }
 
-    function getBase64FromImageUrl(url) {
-      const img = new Image();
-      img.setAttribute("crossOrigin", "anonymous");
+  async updateState () {
+    const user = await browser.fxa.getSignedInUser();
 
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = this.width;
-        canvas.height = this.height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(this, 0, 0);
-
-        browser.browserAction.setIcon({ imageData: ctx.getImageData(0, 0, 200, 200)});
-      };
-
-      img.src = url;
+    if (! user) {
+      this._isAuthenticated = false;
+      this._noAvatar();
+      return;
     }
+
+    this._isAuthenticated = true;
+
+    if (! user.profileCache || ! user.profileCache.profile.avatar) {
+      this._defaultAvatar(user.email);
+      return;
+    }
+
+    this._userAvatar(user.profileCache.profile.avatar);
+  }
+
+  _noAvatar () {
+    if (this._avatar) {
+      this._avatar = null;
+      browser.browserAction.setIcon({ path: "icons/avatar.png" });
+    }
+  }
+
+  _defaultAvatar (email) {
+    if (this._avatar) {
+      this._avatar = null;
+      // TODO: Render first character of email instead
+      browser.browserAction.setIcon({ path: "icons/avatar.png" });
+    }
+  }
+
+  _userAvatar (avatar) {
+    if (this._avatar === avatar) {
+      return;
+    }
+
+    this._avatar = avatar;
+
+    const img = new Image();
+    img.setAttribute("crossOrigin", "anonymous");
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = this.width;
+      canvas.height = this.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(this, 0, 0);
+
+      browser.browserAction.setIcon({ imageData: avatar });
+    };
+    img.src = url;
   }
 }
 
-// make an instance of the feature class available to background.js
-// construct only. will be configured after setup
 window.feature = new Feature();

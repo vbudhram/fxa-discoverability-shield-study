@@ -33,7 +33,9 @@ this.fxa = class extends ExtensionAPI {
         },
 
         listen (listener) {
-          console.log("api::listen", listener);
+          console.log("api::listen:", listener);
+          console.log("api::listen:", Object.keys(listener));
+          console.log("api::listen:", Object.keys(listener).map(property => typeof property));
 
           EnsureFxAccountsWebChannel();
 
@@ -42,13 +44,13 @@ this.fxa = class extends ExtensionAPI {
               console.log("broker::observe:", subject, topic, data);
               switch (topic) {
                 case ONLOGIN_NOTIFICATION:
-                  return listener.login(data);
+                  return listener.login();
 
                 case ONLOGOUT_NOTIFICATION:
-                  return listener.logout(data);
+                  return listener.logout();
 
                 case ON_PROFILE_CHANGE_NOTIFICATION:
-                  return listener.profileChange(data);
+                  return listener.profileChange();
               }
             },
           };

@@ -58,6 +58,20 @@ class FxABrowserFeature {
       variation.name,
     );
 
+    browser.fxa.listen({
+      login (data) {
+        console.log('FxaEventBroker::login', data);
+      },
+
+      logout (data) {
+        console.log('FxaEventBroker::logout', data);
+      },
+
+      profileChange (data) {
+        console.log('FxaEventBroker::profileChange', data);
+      },
+    });
+
     // TODO: Running into an error "values is undefined" here
     browser.browserAction.setIcon({ path: "icons/avatar.png" });
     browser.browserAction.setTitle({ title: variation.name });

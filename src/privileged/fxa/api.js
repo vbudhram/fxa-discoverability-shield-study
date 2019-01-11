@@ -27,7 +27,7 @@ this.fxa = class extends ExtensionAPI {
     return {
       fxa: {
         getSignedInUser() {
-          console.log("getSignedInUser")
+          console.log("api::getSignedInUser");
           return fxAccounts.getSignedInUser()
             .then((data) => {
               console.log(data);
@@ -35,17 +35,14 @@ this.fxa = class extends ExtensionAPI {
             });
         },
 
-        ensureWebChannel () {
-          EnsureFxAccountsWebChannel();
-        },
-
         listen (listener) {
-          assertFunction(listener.login);
-          assertFunction(listener.logout);
-          assertFunction(listener.profileChange);
+          console.log("api::listen", listener);
+
+          EnsureFxAccountsWebChannel();
 
           const broker = {
             observe (subject, topic, data) {
+              console.log("broker::observe:", subject, topic, data);
               switch (topic) {
                 case ONLOGIN_NOTIFICATION:
                   return listener.login(data);
@@ -67,12 +64,3 @@ this.fxa = class extends ExtensionAPI {
     };
   }
 };
-
-function assertFunction (fn) {
-  const type = typeof fn;
-  if (type !== 'function') {
-    const error = new TypeError(`Expected function, found ${type}`);
-    console.error(error);
-    throw error;
-  }
-}

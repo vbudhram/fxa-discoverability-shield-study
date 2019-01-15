@@ -1,0 +1,37 @@
+[
+  {
+    "namespace": "fxa",
+    "description": "Firefox Accounts API",
+    "functions": [
+      {
+        "name": "getSignedInUser",
+        "type": "function",
+        "description": "Fetch the current signed-in user",
+        "async": true,
+        "parameters": []
+      },
+      {
+        "name": "openSyncPreferences",
+        "type": "function",
+        "description": "Opens sync preferences",
+        "async": true,
+        "parameters": []
+      },
+      {
+        "name": "listen",
+        "type": "function",
+        "description": "Listen for events from Firefox Accounts",
+        "async": false,
+        "parameters": []
+      }
+    ],
+    "events": [
+      {
+        "name": "onUpdate",
+        "type": "function",
+        "description": "Login event",
+        "parameters": []
+      }
+    ]
+  }
+]

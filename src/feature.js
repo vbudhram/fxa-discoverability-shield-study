@@ -29,40 +29,11 @@ class Feature {
     const { variation, isFirstRun } = studyInfo;
 
     // Initiate our browser action
-    new BrowserActionButtonChoiceFeature(variation);
+    new FxABrowserFeature(variation);
 
     // perform something only during first run
     if (isFirstRun) {
-      browser.introductionNotificationBar.onIntroductionShown.addListener(
-        () => {
-          console.log("onIntroductionShown");
-
-          feature.sendTelemetry({
-            event: "onIntroductionShown",
-          });
-        },
-      );
-
-      browser.introductionNotificationBar.onIntroductionAccept.addListener(
-        () => {
-          console.log("onIntroductionAccept");
-          feature.sendTelemetry({
-            event: "onIntroductionAccept",
-          });
-        },
-      );
-
-      browser.introductionNotificationBar.onIntroductionLeaveStudy.addListener(
-        () => {
-          console.log("onIntroductionLeaveStudy");
-          feature.sendTelemetry({
-            event: "onIntroductionLeaveStudy",
-          });
-          browser.study.endStudy("introduction-leave-study");
-        },
-      );
-
-      browser.introductionNotificationBar.show(variation.name);
+      // TODO: What should we do on first run
     }
   }
 
@@ -75,73 +46,110 @@ class Feature {
    * Called at end of study, and if the user disables the study or it gets uninstalled by other means.
    */
   async cleanup() {}
-
-  /**
-   * Example of a utility function
-   *
-   * @param variation
-   * @returns {string}
-   */
-  static iconPath(variation) {
-    return `icons/${variation.name}.svg`;
-  }
 }
 
-class BrowserActionButtonChoiceFeature {
+class FxABrowserFeature {
   /**
    * - set image, text, click handler (telemetry)
    */
   constructor(variation) {
-    console.log(
-      "Initializing BrowserActionButtonChoiceFeature:",
-      variation.name,
-    );
-    this.timesClickedInSession = 0;
+    console.log("Initializing FxABrowserFeature:", variation.name);
 
-    // modify BrowserAction (button) ui for this particular {variation}
-    console.log("path:", `icons/${variation.name}.svg`);
-    // TODO: Running into an error "values is undefined" here
-    browser.browserAction.setIcon({ path: Feature.iconPath(variation) });
     browser.browserAction.setTitle({ title: variation.name });
-    browser.browserAction.onClicked.addListener(() => this.handleButtonClick());
-    console.log("initialized");
+
+    browser.fxa.listen();
+
+    this.updateState();
+
+    browser.fxa.onUpdate.addListener(() => {
+      this.updateState();
+    });
   }
 
-  /** handleButtonClick
-   *
-   * - instrument browserAction button clicks
-   * - change label
-   */
-  handleButtonClick() {
-    console.log("handleButtonClick");
-    // note: doesn't persist across a session, unless you use localStorage or similar.
-    this.timesClickedInSession += 1;
-    console.log("got a click", this.timesClickedInSession);
-    browser.browserAction.setBadgeText({
-      text: this.timesClickedInSession.toString(),
-    });
+  async updateState() {
 
-    // telemetry: FIRST CLICK
-    if (this.timesClickedInSession === 1) {
-      browser.study.sendTelemetry({ event: "button-first-click-in-session" });
+    // The stored sessionToken will always be the source of truth when checking
+    // account state.
+    const user = await browser.fxa.getSignedInUser();
+    if (!user) {
+      this._noUser();
     }
 
-    // telemetry EVERY CLICK
-    browser.study.sendTelemetry({
-      event: "button-click",
-      timesClickedInSession: "" + this.timesClickedInSession,
-    });
-
-    // webExtension-initiated ending for "used-often"
-    //
-    // - 3 timesClickedInSession in a session ends the study.
-    // - see `../Config.jsm` for what happens during this ending.
-    if (this.timesClickedInSession >= 3) {
-      browser.study.endStudy("used-often");
+    if (user && !user.verified) {
+      this._unverifiedUser();
     }
+
+    if (user && user.verified) {
+      this._verifiedUser(user);
+    }
+  }
+
+  _noUser() {
+    this._defaultAvatar();
+    browser.browserAction.setIcon({ path: "icons/avatar.svg" });
+    browser.browserAction.setPopup({
+      popup: "popup/sign_in/sign_in.html",
+    });
+  }
+
+  _unverifiedUser() {
+    this._defaultAvatar();
+    browser.browserAction.setIcon({ path: "icons/avatar_confirm.svg" });
+    browser.browserAction.setPopup({
+      popup: "popup/unverified/unverified.html",
+    });
+  }
+
+  _verifiedUser(user) {
+    if (!user.profileCache || !user.profileCache.profile.avatar) {
+      this._defaultAvatar(user.email);
+    } else {
+      this._userAvatar(user.profileCache.profile.avatar);
+    }
+
+    browser.browserAction.setPopup({
+      popup: "popup/menu/menu.html",
+    });
+  }
+
+  _defaultAvatar() {
+    if (this._avatar) {
+      this._avatar = null;
+      // TODO: Render first character of email instead
+      browser.browserAction.setIcon({ path: "icons/avatar.svg" });
+    }
+  }
+
+  _userAvatar(url) {
+    console.log("FxABrowserFeature::_userAvatar");
+    if (this._avatar && this._avatarUrl === url) {
+      return;
+    }
+
+    this._avatarUrl = url;
+
+    const img = new Image();
+    img.setAttribute("crossOrigin", "anonymous");
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      canvas.width = this.width;
+      canvas.height = this.height;
+
+      const ctx = canvas.getContext("2d");
+
+      // Create a circular avatar
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, 0, 2 * Math.PI);
+      ctx.clip();
+
+      ctx.drawImage(this, 0, 0);
+
+      this._avatar = ctx.getImageData(0, 0, 200, 200);
+
+      browser.browserAction.setIcon({ imageData: this._avatar });
+    }
+    img.src = url;
   }
 }
 
-// make an instance of the feature class available to background.js
-// construct only. will be configured after setup
 window.feature = new Feature();
